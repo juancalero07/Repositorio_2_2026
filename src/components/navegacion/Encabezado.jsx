@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Container, Nav, Navbar, Offcanvas } from 'react-bootstrap';
-import supabase from "../database/supabaseconfig";
-
+import supabase from '../../database/supabaseconfig';
 
 // Asegúrate de que la ruta a tu logo sea correcta
 import logo from "../../assets/react.svg"; 
@@ -101,15 +100,15 @@ const Encabezado = () => {
 
                     <hr className="text-white d-md-none" />
 
-                    {/* Ícono de cerrar sesión rápido (solo visible si el menú está cerrado) */}
-                    {!mostrarMenu && (
+                    {/* ✅ CORREGIDO */}
+                    {localStorage.getItem("usuario-supabase") && (
                         <Nav.Link onClick={cerrarSesion} className="text-white">
-                            <i className="bi-box-arrow-right me-2"></i>
+                            <i className="bi-box-arrow-right me-2"></i> Cerrar sesión
                         </Nav.Link>
                     )}
                 </Nav>
 
-                {/* Info de usuario dentro del Offcanvas (solo si mostrarMenu es true) */}
+                {/* Info de usuario dentro del Offcanvas */}
                 {mostrarMenu && (
                     <div className="mt-3 p-3 rounded bg-light text-dark">
                         <p className="mb-2 text-truncate">
@@ -146,7 +145,6 @@ const Encabezado = () => {
                     <h4 className="mb-0">Discosa</h4>
                 </Navbar.Brand>
 
-                {/* Botón del menú (Toggle) - Se oculta en el login */}
                 {!esLogin && (
                     <Navbar.Toggle
                         aria-controls="menu-offcanvas"
