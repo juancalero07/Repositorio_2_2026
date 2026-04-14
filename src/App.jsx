@@ -1,4 +1,3 @@
-// import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Encabezado from "./components/navegacion/Encabezado";
@@ -13,45 +12,42 @@ import Pagina404 from "./views/Pagina404";
 
 import "./App.css";
 
-const App = () => {
+function App() {
   return (
     <Router>
-      {/*...*/}
       <Encabezado />
+      <main className="container margen-superior-main"></main>
+      <Routes>
+        <Route path="/login" element={<Login />} />
 
-      <main className="container mt-4">
-        <Routes>
-          {/* Ruta Pública: Login */}
-          <Route path="/login" element={<Login />} />
+        <Route path="/" element={
+          <RutaProtegida>
+            <Inicio />
+          </RutaProtegida>
+        } />
 
-          {/* Ruta Pública: Catálogo (según tu captura anterior, esta no estaba protegida) */}
-          <Route path="/catalogo" element={<Catalogo />} />
+        <Route path="/categorias" element={
+          <RutaProtegida>
+            <Categorias />
+          </RutaProtegida>
+        } />
 
-          {/* Rutas Protegidas: Requieren estar logueado */}
-          <Route path="/" element={
-            <RutaProtegida>
-              <Inicio />
-            </RutaProtegida>
-          } />
-          
-          <Route path="/categorias" element={
-            <RutaProtegida>
-              <Categorias />
-            </RutaProtegida>
-          } />
+        <Route path="/productos" element={
+          <RutaProtegida>
+            <Productos />
+          </RutaProtegida>
+        } />
 
-          <Route path="/productos" element={
-            <RutaProtegida>
-              <Productos />
-            </RutaProtegida>
-          } />
+        <Route path="/catalogo" element={
+          <RutaProtegida>
+            <Catalogo />
+          </RutaProtegida>
+        } />
 
-          {/* Ruta para manejar errores 404 */}
-          <Route path="*" element={<Pagina404 />} />
-        </Routes>
-      </main>
+        <Route path="*" element={<Pagina404 />} />
+      </Routes>
     </Router>
   );
-};
+}
 
 export default App;

@@ -103,7 +103,7 @@ const Encabezado = () => {
                     {/* ✅ CORREGIDO */}
                     {localStorage.getItem("usuario-supabase") && (
                         <Nav.Link onClick={cerrarSesion} className="text-white">
-                            <i className="bi-box-arrow-right me-2"></i> Cerrar sesión
+                            <i className="bi-box-arrow-right me-2"></i>
                         </Nav.Link>
                     )}
                 </Nav>
