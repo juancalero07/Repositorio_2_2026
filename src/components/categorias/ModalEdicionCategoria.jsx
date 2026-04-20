@@ -1,43 +1,53 @@
-import React from "react";
+import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
-const ModalEditarCategoria = ({
-  mostrar,
-  cerrar,
-  categoria,
-  setCategoria,
-  guardarCambios,
+const ModalEdicionCategoria = ({
+  mostrarModalEdicion,
+  setMostrarModalEdicion,
+  categoriaEditar,
+  setCategoriaEditar,
+  actualizarCategoria
 }) => {
+  // Paso 2 de la guía: variable de estado y método para evitar doble clic
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleActualizar = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    await actualizarCategoria();
+    setIsSubmitting(false);
+  };
+
   return (
-    <Modal show={mostrar} onHide={cerrar}>
+    <Modal show={mostrarModalEdicion} onHide={() => setMostrarModalEdicion(false)}>
       <Modal.Header closeButton>
         <Modal.Title>Editar Categoría</Modal.Title>
       </Modal.Header>
-
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3">
             <Form.Label>Nombre</Form.Label>
             <Form.Control
               type="text"
-              value={categoria?.nombre_categoria || ""}
+              value={categoriaEditar?.nombre_categoria || ""}
               onChange={(e) =>
-                setCategoria({
-                  ...categoria,
+                setCategoriaEditar({
+                  ...categoriaEditar,
                   nombre_categoria: e.target.value,
                 })
               }
             />
           </Form.Group>
 
-          <Form.Group>
+          <Form.Group className="mb-3">
             <Form.Label>Descripción</Form.Label>
             <Form.Control
-              type="text"
-              value={categoria?.descripcion_categoria || ""}
+              as="textarea"
+              rows={3}
+              value={categoriaEditar?.descripcion_categoria || ""}
               onChange={(e) =>
-                setCategoria({
-                  ...categoria,
+                setCategoriaEditar({
+                  ...categoriaEditar,
                   descripcion_categoria: e.target.value,
                 })
               }
@@ -45,17 +55,23 @@ const ModalEditarCategoria = ({
           </Form.Group>
         </Form>
       </Modal.Body>
-
       <Modal.Footer>
-        <Button variant="secondary" onClick={cerrar}>
+        <Button
+          variant="secondary"
+          onClick={() => setMostrarModalEdicion(false)}
+        >
           Cancelar
         </Button>
-        <Button variant="primary" onClick={guardarCambios}>
-          Guardar
+        <Button
+          variant="primary"
+          onClick={handleActualizar}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Actualizando..." : "Actualizar"}
         </Button>
       </Modal.Footer>
     </Modal>
   );
 };
 
-export default ModalEditarCategoria;
+export default ModalEdicionCategoria;

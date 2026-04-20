@@ -16,7 +16,7 @@ function App() {
   return (
     <Router>
       <Encabezado />
-      <main className="container margen-superior-main"></main>
+      <main className="container margen-superior-main "></main>
       <Routes>
         <Route path="/login" element={<Login />} />
 
