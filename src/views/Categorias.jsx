@@ -5,7 +5,7 @@ import supabase from "../database/supabaseconfig";
 import ModalRegistroCategoria from "../components/categorias/ModalRegistroCategoria";
 import ModalEdicionCategoria from "../components/categorias/ModalEdicionCategoria";
 import ModalEliminacionCategoria from "../components/categorias/ModalEliminacionCategoria";
-
+import Paginacion from "../components/ordenamiento/Paginacion";
 import TablaCategorias from "../components/categorias/TablaCategorias";
 import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
@@ -21,7 +21,29 @@ const Categorias = () => {
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
   const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
+// Estados de paginación
+const [registrosPorPagina, setRegistrosPorPagina] = useState(10);
+const [paginaActual, setPaginaActual] = useState(1);
 
+// Calcular categorías paginadas
+const categoriasPaginadas = categoriasFiltradas.slice(
+  (paginaActual - 1) * registrosPorPagina,
+  paginaActual * registrosPorPagina
+);
+
+// Total de páginas
+const totalPaginas = Math.ceil(categoriasFiltradas.length / registrosPorPagina);
+
+// Función para cambiar página
+const establecerPaginaActual = (pagina) => {
+  setPaginaActual(pagina);
+};
+
+// Función para cambiar cantidad por página
+const establecerRegistrosPorPagina = (cantidad) => {
+  setRegistrosPorPagina(cantidad);
+  setPaginaActual(1);
+};
   const [categoriaEditar, setCategoriaEditar] = useState(null);
   const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
 
@@ -201,6 +223,13 @@ const Categorias = () => {
           </div>
         </>
       )}
+      <Paginacion
+  registrosPorPagina={registrosPorPagina}
+  totalRegistros={categoriasFiltradas.length}
+  paginaActual={paginaActual}
+  establecerPaginaActual={establecerPaginaActual}
+  establecerRegistrosPorPagina={establecerRegistrosPorPagina}
+/>
 
     {/* ==================== MODALES ==================== */}
 
