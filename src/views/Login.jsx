@@ -1,28 +1,34 @@
 import { Container, Row, Col, Form, Button, Alert, Card } from "react-bootstrap";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import supabase from "../database/supabaseconfig";   // ← default import (como en tu proyecto)
+import supabase from "../database/supabaseconfig";
 
 const Login = () => {
   const [usuario, setUsuario] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);   // ← añadido
+  const [loading, setLoading] = useState(false);
+
   const navegar = useNavigate();
 
+  // 🔥 FIX: control de sesión sin localStorage (evita bugs)
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
-    // Mejor chequeo de sesión
-    const usuarioGuardado = localStorage.getItem("usuario-supabase");
-    if (usuarioGuardado) {
-      navegar("/");
-    }
+    const verificarSesion = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      if (data.session) {
+        navegar("/");
+      }
+    };
+
+    verificarSesion();
 
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, [navegar]);
+  }, []);
 
   const iniciarSesion = async (e) => {
     e.preventDefault();
@@ -41,7 +47,7 @@ const Login = () => {
       }
 
       if (data.user) {
-        localStorage.setItem("usuario-supabase", data.user.email);
+        // 🔥 FIX: solo navegación, sin localStorage
         navegar("/");
       }
     } catch (err) {
@@ -59,7 +65,7 @@ const Login = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(135deg, #52b5d1, #b5fffc)", // mejor visual
+        background: "linear-gradient(135deg, #52b5d1, #b5fffc)",
         padding: "20px",
       }}
     >
@@ -92,9 +98,9 @@ const Login = () => {
                   />
                 </Form.Group>
 
-                <Button 
-                  type="submit" 
-                  className="w-100 mt-3" 
+                <Button
+                  type="submit"
+                  className="w-100 mt-3"
                   disabled={loading}
                 >
                   {loading ? "Ingresando..." : "Entrar"}

@@ -10,6 +10,7 @@ const ModalRegistroProducto = ({
   agregarProducto,
   categorias,
 }) => {
+  
   const [deshabilitado, setDeshabilitado] = useState(false);
 
   const handleAgregar = async () => {
@@ -34,6 +35,7 @@ const ModalRegistroProducto = ({
       <Modal.Body>
         <Form>
           <Row>
+
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Categoría *</Form.Label>
@@ -108,6 +110,7 @@ const ModalRegistroProducto = ({
                 />
               </Form.Group>
             </Col>
+            
           </Row>
         </Form>
       </Modal.Body>
@@ -116,7 +119,11 @@ const ModalRegistroProducto = ({
         <Button variant="secondary" onClick={() => setMostrarModal(false)}>
           Cancelar
         </Button>
-        <Button variant="primary" onClick={handleAgregar} disabled={deshabilitado}>
+        <Button
+          variant="primary"
+          onClick={handleAgregar}
+          disabled={deshabilitado}
+        >
           Guardar
         </Button>
       </Modal.Footer>

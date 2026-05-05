@@ -1,82 +1,87 @@
-import React from "react";
-import { Table, Button, Image } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Table, Spinner, Button, Image } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-const TablaProductos = ({ 
-  productos, 
-  onEditar, 
-  onEliminar 
+const TablaProductos = ({
+  productos,
+  abrirModalEdicion,
+  abrirModalEliminacion,
 }) => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (productos && productos.length > 0) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+  }, [productos]);
+
   return (
     <>
-      {productos.length > 0 ? (
-        <Table striped bordered hover responsive size="sm">
-          <thead className="table-dark">
+      {loading ? (
+        <div className="text-center">
+          <h4>Cargando productos...</h4>
+          <Spinner animation="border" variant="success" role="status" />
+        </div>
+      ) : (
+        <Table
+          striped
+          borderless
+          hover
+          responsive
+          size="sm"
+          style={{ tableLayout: "fixed" }} 
+        >
+          <thead>
             <tr>
-              <th className="text-center" style={{ width: '80px' }}>Imagen</th>
               <th>ID</th>
-              <th>Nombre</th>
-              <th>Categoría</th>
-              <th className="text-end">Precio (C$)</th>
-              <th className="text-center">Stock</th>
-              <th className="d-none d-lg-table-cell">Descripción</th>
+              <th>Producto</th>
+              <th className="d-none d-md-table-cell">Descripción</th>
+              <th>Categoria</th>
+              <th>Precio de Venta</th>
+              <th style={{ width: "70px" }}>Imagen</th>
               <th className="text-center">Acciones</th>
             </tr>
           </thead>
+
           <tbody>
             {productos.map((producto) => (
               <tr key={producto.id_producto}>
-                {/* Columna de Imagen */}
-                <td className="text-center">
-                  {producto.url_imagen ? (
-                    <Image
-                      src={producto.url_imagen}
-                      alt={producto.nombre}
-                      thumbnail
-                      style={{ 
-                        width: '60px', 
-                        height: '60px', 
-                        objectFit: 'cover' 
-                      }}
-                    />
-                  ) : (
-                    <div 
-                      className="bg-light d-flex align-items-center justify-content-center"
-                      style={{ 
-                        width: '60px', 
-                        height: '60px', 
-                        borderRadius: '6px',
-                        border: '1px solid #dee2e6'
-                      }}
-                    >
-                      <i className="bi bi-image text-muted" style={{ fontSize: '24px' }}></i>
-                    </div>
-                  )}
-                </td>
-
                 <td>{producto.id_producto}</td>
-                <td><strong>{producto.nombre}</strong></td>
-                <td>{producto.nombre_categoria || "Sin categoría"}</td>
-                <td className="text-end fw-semibold">
-                  {parseFloat(producto.precio).toFixed(2)}
-                </td>
-                <td className="text-center">
-                  <span className={`badge ${producto.stock > 0 ? 'bg-success' : 'bg-danger'}`}>
-                    {producto.stock}
-                  </span>
-                </td>
-                <td className="d-none d-lg-table-cell text-truncate" style={{ maxWidth: '250px' }}>
-                  {producto.descripcion || "Sin descripción"}
+
+                <td>{producto.nombre_producto}</td>
+
+                <td className="d-none d-md-table-cell">
+                  {producto.descripcion_producto}
                 </td>
 
-                {/* Acciones */}
+                <td>
+                  {producto.Categorias?.nombre_categoria || "Sin categoría"}
+                </td>
+
+                <td>{producto.precio_venta}</td>
+
+                <td style={{ width: "70px", padding: "5px" }}>
+                  <Image
+                    src={producto.url_imagen}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "cover",
+                      display: "block",
+                      margin: "auto",
+                      borderRadius: "6px",
+                    }}
+                  />
+                </td>
+
                 <td className="text-center">
                   <Button
                     variant="outline-warning"
                     size="sm"
-                    className="me-1"
-                    onClick={() => onEditar(producto)}
-                    title="Editar producto"
+                    className="m-1"
+                    onClick={() => abrirModalEdicion(producto)}
                   >
                     <i className="bi bi-pencil"></i>
                   </Button>
@@ -84,8 +89,7 @@ const TablaProductos = ({
                   <Button
                     variant="outline-danger"
                     size="sm"
-                    onClick={() => onEliminar(producto)}
-                    title="Eliminar producto"
+                    onClick={() => abrirModalEliminacion(producto)}
                   >
                     <i className="bi bi-trash"></i>
                   </Button>
@@ -94,11 +98,6 @@ const TablaProductos = ({
             ))}
           </tbody>
         </Table>
-      ) : (
-        <div className="text-center mt-5 py-4">
-          <i className="bi bi-box-seam" style={{ fontSize: '3rem', color: '#6c757d' }}></i>
-          <p className="mt-3 text-muted">No hay productos disponibles para mostrar.</p>
-        </div>
       )}
     </>
   );
