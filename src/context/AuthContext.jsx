@@ -6,21 +6,32 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(null);
   const [permisos, setPermisos] = useState({});
-  const [cargando, setCargando] = useState(true);
 
-  // 🔁 Recuperar sesión
+  // 🔐 CARGAR SESIÓN SEGURA AL INICIAR
   useEffect(() => {
-    const user = localStorage.getItem("usuario-supabase");
-    const perms = localStorage.getItem("permisos");
+    try {
+      const usuarioGuardado = localStorage.getItem("usuario-supabase");
+      const permisosGuardados = localStorage.getItem("permisos");
 
-    if (user) setUsuario(JSON.parse(user));
-    if (perms) setPermisos(JSON.parse(perms));
+      if (usuarioGuardado) {
+        const usuarioParseado = JSON.parse(usuarioGuardado);
+        setUsuario(usuarioParseado);
+      }
 
-    setCargando(false);
+      if (permisosGuardados) {
+        const permisosParseados = JSON.parse(permisosGuardados);
+        setPermisos(permisosParseados);
+      }
+    } catch (error) {
+      console.warn("⚠️ Datos corruptos en localStorage, limpiando...");
+      localStorage.removeItem("usuario-supabase");
+      localStorage.removeItem("permisos");
+    }
   }, []);
 
-  // 🔐 Login
+  // 🔑 LOGIN
   const login = async (email, pin) => {
+    // 1. Buscar empleado
     const { data: empleado, error } = await supabase
       .from("empleados")
       .select("*")
@@ -30,24 +41,31 @@ export const AuthProvider = ({ children }) => {
     if (error) throw new Error("Error al buscar empleado");
     if (!empleado) throw new Error("Empleado no existe");
 
+    // 2. Validar PIN
     if (empleado.pin !== pin) {
       throw new Error("PIN incorrecto");
     }
 
-    const { data: rolData } = await supabase
+    // 3. Obtener permisos
+    const { data: rolData, error: errorRol } = await supabase
       .from("permisos")
       .select("permisos")
       .eq("rol", empleado.tipo_empleado)
       .maybeSingle();
 
+    if (errorRol) throw new Error("Error obteniendo permisos");
+
+    // 4. Guardar sesión (SIEMPRE JSON)
     setUsuario(empleado);
     setPermisos(rolData?.permisos || {});
 
     localStorage.setItem("usuario-supabase", JSON.stringify(empleado));
     localStorage.setItem("permisos", JSON.stringify(rolData?.permisos || {}));
+
+    return empleado;
   };
 
-  // 🔓 Logout
+  // 🚪 LOGOUT
   const logout = () => {
     setUsuario(null);
     setPermisos({});
@@ -55,12 +73,20 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("permisos");
   };
 
-  // 🛡️ Permisos
-  const tienePermiso = (permiso) => permisos?.[permiso] === true;
+  // 🔒 VALIDAR PERMISOS SEGURO
+  const tienePermiso = (permiso) => {
+    return permisos?.[permiso] === true;
+  };
 
   return (
     <AuthContext.Provider
-      value={{ usuario, login, logout, tienePermiso, cargando }}
+      value={{
+        login,
+        logout,
+        usuario,
+        permisos,
+        tienePermiso,
+      }}
     >
       {children}
     </AuthContext.Provider>
