@@ -21,12 +21,8 @@ const TarjetaCatalogo = ({ producto, categoriaNombre }) => {
         tabIndex={0}
         onClick={() => setMostrarModal(true)}
         onKeyDown={(e) => e.key === "Enter" && setMostrarModal(true)}
-        aria-labelledby={`producto-${producto.id_producto}-title`}
       >
-        <div
-          className="ratio ratio-1x1 bg-light"
-          style={{ overflow: "hidden" }}
-        >
+        <div className="ratio ratio-1x1 bg-light">
           {producto.url_imagen ? (
             <img
               src={producto.url_imagen}
@@ -47,58 +43,65 @@ const TarjetaCatalogo = ({ producto, categoriaNombre }) => {
             </div>
           )}
         </div>
+
         <Card.Body className="d-flex flex-column p-3">
-          <Card.Title
-            id={`producto-${producto.id_producto}-title`}
-            className="h6 fw-bold text-dark mb-2"
-          >
+          <Card.Title className="h6 fw-bold text-dark mb-2">
             {producto.nombre_producto}
           </Card.Title>
 
+          {/* ✅ TEXTO CORREGIDO */}
           {descripcion && (
-            <Card.Text className="text-muted small flex-grow-1">
-              {previsualizacionTexto}
-              {tieneMasTexto && (
-                <span className="text-primary fw-medium ms-1">
-                  {" Leer más"}
-                </span>
-              )}
+            <>
+              <Card.Text className="text-muted small flex-grow-1">
+                {previsualizacionTexto}
+                {tieneMasTexto && (
+                  <span className="text-primary fw-medium ms-1">
+                    Leer más
+                  </span>
+                )}
+              </Card.Text>
 
+              {/* ✅ FUERA DEL <p> */}
               <div className="mt-2">
-                <Badge bg="secondary" pill size="sm">
+                <Badge bg="secondary" pill>
                   {categoriaNombre || "Sin categoría"}
                 </Badge>
               </div>
-            </Card.Text>
+            </>
           )}
+
           <hr />
-          <div className="className=mt-auto pt-2">
+
+          {/* ✅ CORREGIDO className */}
+          <div className="mt-auto pt-2">
             <h4 className="text-success fw-bold mb-0">
               C${parseFloat(producto.precio_venta).toFixed(1)}
             </h4>
           </div>
         </Card.Body>
       </Card>
+
+      {/* 🔥 MODAL */}
       <Modal
         show={mostrarModal}
         onHide={() => setMostrarModal(false)}
         size="lg"
         centered
       >
-        <Modal.Header closeButton className="border-0 pb-0">
-          <Modal.Title className="fw-bold fs-4">
+        <Modal.Header closeButton>
+          <Modal.Title className="fw-bold">
             {producto.nombre_producto}
           </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body className="pt-3">
+        <Modal.Body>
           <div className="row g-4">
             <div className="col-md-5">
               {producto.url_imagen ? (
                 <img
                   src={producto.url_imagen}
                   alt={producto.nombre_producto}
-                  className="img-fluid rounded shadow-sm"
+                  className="img-fluid rounded"
                   style={{
                     maxHeight: "400px",
                     objectFit: "contain",
@@ -115,13 +118,10 @@ const TarjetaCatalogo = ({ producto, categoriaNombre }) => {
               )}
             </div>
 
-            {/* Detalles a la derecha */}
             <div className="col-md-7">
-              <div className="d-flex align-items-center mb-3">
-                <Badge bg="secondary" pill className="me-2">
-                  {categoriaNombre || "Sin categoría"}
-                </Badge>
-              </div>
+              <Badge bg="secondary" className="mb-3">
+                {categoriaNombre || "Sin categoría"}
+              </Badge>
 
               <h3 className="text-success fw-bold mb-4">
                 C${parseFloat(producto.precio_venta).toFixed(1)}
@@ -129,17 +129,15 @@ const TarjetaCatalogo = ({ producto, categoriaNombre }) => {
 
               {descripcion && (
                 <>
-                  <h5 className="fw-semibold mb-2">Descripción</h5>
-                  <p className="text-muted lead" style={{ lineHeight: "1.2" }}>
-                    {descripcion}
-                  </p>
+                  <h5 className="fw-semibold">Descripción</h5>
+                  <p className="text-muted">{descripcion}</p>
                 </>
               )}
             </div>
           </div>
         </Modal.Body>
 
-        <Modal.Footer className="border-0">
+        <Modal.Footer>
           <Button variant="secondary" onClick={() => setMostrarModal(false)}>
             Cerrar
           </Button>

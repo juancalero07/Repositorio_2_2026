@@ -9,6 +9,7 @@ import Catalogo from "./views/Catalogo";
 import Productos from "./views/Productos";
 import Login from "./views/Login";
 import Pagina404 from "./views/Pagina404";
+import Permisos from './views/Permisos';
 
 import "./App.css";
 
@@ -16,36 +17,49 @@ function App() {
   return (
     <Router>
       <Encabezado />
-      <main className="container margen-superior-main "></main>
-      <Routes>
-        <Route path="/login" element={<Login />} />
 
-        <Route path="/" element={
-          <RutaProtegida>
-            <Inicio />
-          </RutaProtegida>
-        } />
+      {/* 🔥 AHORA SÍ BIEN USADO */}
+      <main className="container mt-4 pt-4">
 
-        <Route path="/categorias" element={
-          <RutaProtegida>
-            <Categorias />
-          </RutaProtegida>
-        } />
+        <Routes>
 
-        <Route path="/productos" element={
-          <RutaProtegida>
-            <Productos />
-          </RutaProtegida>
-        } />
+          <Route path="/login" element={<Login />} />
 
-        <Route path="/catalogo" element={
-          <RutaProtegida>
-            <Catalogo />
-          </RutaProtegida>
-        } />
+          <Route path="/" element={
+            <RutaProtegida>
+              <Inicio />
+            </RutaProtegida>
+          } />
 
-        <Route path="*" element={<Pagina404 />} />
-      </Routes>
+          <Route path="/categorias" element={
+            <RutaProtegida>
+              <Categorias />
+            </RutaProtegida>
+          } />
+
+          <Route path="/productos" element={
+            <RutaProtegida>
+              <Productos />
+            </RutaProtegida>
+          } />
+
+          <Route path="/catalogo" element={
+            <RutaProtegida>
+              <Catalogo />
+            </RutaProtegida>
+          } />
+
+          <Route path="/permisos" element={
+            <RutaProtegida>
+              <Permisos />
+            </RutaProtegida>
+          } />
+
+          <Route path="*" element={<Pagina404 />} />
+
+        </Routes>
+
+      </main>
     </Router>
   );
 }

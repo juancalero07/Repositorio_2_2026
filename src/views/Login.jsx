@@ -1,115 +1,71 @@
-import { Container, Row, Col, Form, Button, Alert, Card } from "react-bootstrap";
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import supabase from "../database/supabaseconfig";
+import FormularioLogin from "../components/login/FormularioLogin";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const [usuario, setUsuario] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [cargando, setCargando] = useState(false);
 
   const navegar = useNavigate();
+  const { login } = useAuth();
 
-  // 🔥 FIX: control de sesión sin localStorage (evita bugs)
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
+  const iniciarSesion = async () => {
+    if (!usuario || !contrasena) {
+      setError("Por favor ingresa usuario y contraseña");
+      return;
+    }
 
-    const verificarSesion = async () => {
-      const { data } = await supabase.auth.getSession();
-
-      if (data.session) {
-        navegar("/");
-      }
-    };
-
-    verificarSesion();
-
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
-
-  const iniciarSesion = async (e) => {
-    e.preventDefault();
+    setCargando(true);
     setError(null);
-    setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: usuario.trim(),
-        password: contrasena.trim(),
-      });
-
-      if (error) {
-        setError("Usuario o contraseña incorrectos");
-        return;
-      }
-
-      if (data.user) {
-        // 🔥 FIX: solo navegación, sin localStorage
-        navegar("/");
-      }
+      await login(usuario, contrasena);
+      navegar("/");
     } catch (err) {
       console.error(err);
-      setError("Error al conectar con el servidor");
+      setError("Usuario o contraseña incorrectos");
     } finally {
-      setLoading(false);
+      setCargando(false);
     }
   };
 
+  // Redirigir si ya está logueado
+  useEffect(() => {
+    const usuarioGuardado = localStorage.getItem("usuario-supabase");
+    if (usuarioGuardado) {
+      navegar("/");
+    }
+  }, [navegar]);
+
+  const estiloContenedor = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "linear-gradient(135deg, #FFDEE9, #B5FFFC)",
+    overflow: "hidden",
+    padding: "20px",
+  };
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "linear-gradient(135deg, #52b5d1, #b5fffc)",
-        padding: "20px",
-      }}
-    >
-      <Container>
-        <Row className="justify-content-center">
-          <Col md={5} lg={4}>
-            <Card className="p-4 shadow" style={{ borderRadius: "15px" }}>
-              <h4 className="text-center mb-4">Iniciar Sesión</h4>
-
-              {error && <Alert variant="danger">{error}</Alert>}
-
-              <Form onSubmit={iniciarSesion}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Correo electrónico</Form.Label>
-                  <Form.Control
-                    type="email"
-                    value={usuario}
-                    onChange={(e) => setUsuario(e.target.value)}
-                    required
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Contraseña</Form.Label>
-                  <Form.Control
-                    type="password"
-                    value={contrasena}
-                    onChange={(e) => setContrasena(e.target.value)}
-                    required
-                  />
-                </Form.Group>
-
-                <Button
-                  type="submit"
-                  className="w-100 mt-3"
-                  disabled={loading}
-                >
-                  {loading ? "Ingresando..." : "Entrar"}
-                </Button>
-              </Form>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+    <div style={estiloContenedor}>
+      <FormularioLogin
+        usuario={usuario}
+        contrasena={contrasena}
+        error={error}
+        setUsuario={setUsuario}
+        setContrasena={setContrasena}
+        iniciarSesion={iniciarSesion}
+        cargando={cargando}
+      />
     </div>
   );
 };
