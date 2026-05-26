@@ -10,8 +10,12 @@ import Productos from "./views/Productos";
 import Login from "./views/Login";
 import Pagina404 from "./views/Pagina404";
 import Permisos from './views/Permisos';
+import Empleados from './views/Empleados';
+import Clientes from './views/Clientes';
+import Ventas from './views/Ventas';
 
 import "./App.css";
+
 
 function App() {
   return (
@@ -28,6 +32,11 @@ function App() {
           <Route path="/" element={
             <RutaProtegida>
               <Inicio />
+            </RutaProtegida>
+          } />
+           <Route path="/clientes" element={
+            <RutaProtegida>
+              <Clientes />
             </RutaProtegida>
           } />
 
@@ -52,6 +61,16 @@ function App() {
           <Route path="/permisos" element={
             <RutaProtegida>
               <Permisos />
+            </RutaProtegida>
+          } />
+          <Route path="/empleados" element={
+            <RutaProtegida>
+              <Empleados />
+            </RutaProtegida>
+          } />
+          <Route path="/ventas" element={
+            <RutaProtegida>
+              <Ventas />
             </RutaProtegida>
           } />
 

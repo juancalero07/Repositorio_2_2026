@@ -8,7 +8,6 @@ const Encabezado = () => {
   const [mostrarMenu, setMostrarMenu] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
   const { usuario, logout, tienePermiso } = useAuth();
 
   const cerrarSesion = () => {
@@ -36,9 +35,15 @@ const Encabezado = () => {
               {tienePermiso("ver_inicio") && (
                 <Nav.Link onClick={() => navigate("/")}>Inicio</Nav.Link>
               )}
+              {tienePermiso("ver_clientes") && (
+                <Nav.Link onClick={() => navigate("/clientes")}>Clientes</Nav.Link>
+              )}
 
               {tienePermiso("ver_categorias") && (
                 <Nav.Link onClick={() => navigate("/categorias")}>Categorías</Nav.Link>
+              )}
+              {tienePermiso("ver_empleados") && (
+                <Nav.Link onClick={() => navigate("/empleados")}>Empleados </Nav.Link>
               )}
 
               {tienePermiso("ver_productos") && (
@@ -51,6 +56,9 @@ const Encabezado = () => {
 
               {tienePermiso("ver_permisos") && (
                 <Nav.Link onClick={() => navigate("/permisos")}>Permisos</Nav.Link>
+              )}
+               {tienePermiso("ver_ventas") && (
+                <Nav.Link onClick={() => navigate("/ventas")}>Ventas </Nav.Link>
               )}
 
               {usuario && (

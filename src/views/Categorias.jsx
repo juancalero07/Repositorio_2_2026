@@ -10,6 +10,8 @@ import TablaCategorias from "../components/categorias/TablaCategorias";
 import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import NotificacionOperacion from "../components/NotificacionOperacion";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const Categorias = () => {
   const [categorias, setCategorias] = useState([]);
@@ -21,29 +23,31 @@ const Categorias = () => {
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
   const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
-// Estados de paginación
-const [registrosPorPagina, setRegistrosPorPagina] = useState(10);
-const [paginaActual, setPaginaActual] = useState(1);
 
-// Calcular categorías paginadas
-const categoriasPaginadas = categoriasFiltradas.slice(
-  (paginaActual - 1) * registrosPorPagina,
-  paginaActual * registrosPorPagina
-);
+  // Estados de paginación
+  const [registrosPorPagina, setRegistrosPorPagina] = useState(10);
+  const [paginaActual, setPaginaActual] = useState(1);
 
-// Total de páginas
-const totalPaginas = Math.ceil(categoriasFiltradas.length / registrosPorPagina);
+  // Calcular categorías paginadas
+  const categoriasPaginadas = categoriasFiltradas.slice(
+    (paginaActual - 1) * registrosPorPagina,
+    paginaActual * registrosPorPagina
+  );
 
-// Función para cambiar página
-const establecerPaginaActual = (pagina) => {
-  setPaginaActual(pagina);
-};
+  // Total de páginas
+  const totalPaginas = Math.ceil(categoriasFiltradas.length / registrosPorPagina);
 
-// Función para cambiar cantidad por página
-const establecerRegistrosPorPagina = (cantidad) => {
-  setRegistrosPorPagina(cantidad);
-  setPaginaActual(1);
-};
+  // Función para cambiar página
+  const establecerPaginaActual = (pagina) => {
+    setPaginaActual(pagina);
+  };
+
+  // Función para cambiar cantidad por página
+  const establecerRegistrosPorPagina = (cantidad) => {
+    setRegistrosPorPagina(cantidad);
+    setPaginaActual(1);
+  };
+
   const [categoriaEditar, setCategoriaEditar] = useState(null);
   const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
 
@@ -92,6 +96,7 @@ const establecerRegistrosPorPagina = (cantidad) => {
       );
       setCategoriasFiltradas(filtradas);
     }
+    setPaginaActual(1); // Reiniciar a la página 1 cuando se busca
   }, [textoBusqueda, categorias]);
 
   // ==================== ABRIR MODALES ====================
@@ -175,6 +180,26 @@ const establecerRegistrosPorPagina = (cantidad) => {
     }
   };
 
+  const generarPDFCategoria = (categoria) => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Reporte de Categoría", 14, 20);
+    doc.line(14, 25, 195, 25);
+    doc.setFontSize(12);
+
+    autoTable(doc, {
+      startY: 35,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["ID", categoria.id_categoria],
+        ["Nombre", categoria.nombre_categoria],
+        ["Descripción", categoria.descripcion_categoria],
+      ],
+    });
+
+    doc.save(`categoria_${categoria.id_categoria}.pdf`);
+  };
+
   return (
     <Container className="mt-4">
       <Row className="mb-4">
@@ -203,63 +228,65 @@ const establecerRegistrosPorPagina = (cantidad) => {
           <p className="mt-3">Cargando categorías...</p>
         </div>
       ) : (
-      <>
-          {/* ==================== TARJETAS (se muestran en móviles y tablets) ==================== */}
-          <div className="d-lg-none">   {/* Solo visible en pantallas < lg (móviles) */}
+        <>
+          {/* Tarjetas para móviles usando datos paginados */}
+          <div className="d-lg-none">
             <TarjetaCategoria
-              categorias={categoriasFiltradas}
+              categorias={categoriasPaginadas}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
             />
           </div>
 
-          {/* ==================== TABLA (se muestra solo en computadoras) ==================== */}
-          <div className="d-none d-lg-block">   {/* Solo visible en pantallas ≥ lg */}
+          {/* Tabla para escritorio usando datos paginados */}
+          <div className="d-none d-lg-block">
             <TablaCategorias
-              categorias={categoriasFiltradas}
+              categorias={categoriasPaginadas}
               onEditar={abrirModalEdicion}
               onEliminar={abrirModalEliminacion}
+              generarPDFCategoria={generarPDFCategoria}
             />
           </div>
         </>
       )}
+
       <Paginacion
-  registrosPorPagina={registrosPorPagina}
-  totalRegistros={categoriasFiltradas.length}
-  paginaActual={paginaActual}
-  establecerPaginaActual={establecerPaginaActual}
-  establecerRegistrosPorPagina={establecerRegistrosPorPagina}
-/>
+        registrosPorPagina={registrosPorPagina}
+        totalRegistros={categoriasFiltradas.length}
+        paginaActual={paginaActual}
+        establecerPaginaActual={establecerPaginaActual}
+        establecerRegistrosPorPagina={establecerRegistrosPorPagina}
+      />
 
-    {/* ==================== MODALES ==================== */}
+      {/* ==================== MODALES ==================== */}
+      <ModalRegistroCategoria
+        mostrarModal={mostrarModal}
+        setMostrarModal={setMostrarModal}
+        nuevaCategoria={nuevaCategoria}
+        manejoCambioInput={(e) =>
+          setNuevaCategoria({ ...nuevaCategoria, [e.target.name]: e.target.value })
+        }
+        agregarCategoria={agregarCategoria}
+      />
 
-<ModalRegistroCategoria
-  mostrarModal={mostrarModal}
-  setMostrarModal={setMostrarModal}
-  nuevaCategoria={nuevaCategoria}
-  manejoCambioInput={(e) => 
-    setNuevaCategoria({ ...nuevaCategoria, [e.target.name]: e.target.value })
-  }
-  agregarCategoria={agregarCategoria}
-/>
+      <ModalEdicionCategoria
+        mostrarModalEdicion={mostrarModalEdicion}
+        setMostrarModalEdicion={setMostrarModalEdicion}
+        categoriaEditar={categoriaEditar}
+        setCategoriaEditar={setCategoriaEditar}
+        manejoCambioInputEdicion={(e) =>
+          setCategoriaEditar({ ...categoriaEditar, [e.target.name]: e.target.value })
+        }
+        actualizarCategoria={actualizarCategoria}
+      />
 
-<ModalEdicionCategoria
-  mostrarModalEdicion={mostrarModalEdicion}
-  setMostrarModalEdicion={setMostrarModalEdicion}
-  categoriaEditar={categoriaEditar}
-  setCategoriaEditar={setCategoriaEditar}          
-  manejoCambioInputEdicion={(e) => 
-    setCategoriaEditar({ ...categoriaEditar, [e.target.name]: e.target.value })
-  }
-  actualizarCategoria={actualizarCategoria}
-/>
+      <ModalEliminacionCategoria
+        mostrarModalEliminacion={mostrarModalEliminacion}
+        setMostrarModalEliminacion={setMostrarModalEliminacion}
+        categoriaAEliminar={categoriaAEliminar}
+        eliminarCategoria={eliminarCategoria}
+      />
 
-<ModalEliminacionCategoria
-  mostrarModalEliminacion={mostrarModalEliminacion}
-  setMostrarModalEliminacion={setMostrarModalEliminacion}
-  categoriaAEliminar={categoriaAEliminar}
-  eliminarCategoria={eliminarCategoria}
-/>
       <NotificacionOperacion
         mostrar={toast.mostrar}
         mensaje={toast.mensaje}

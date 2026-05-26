@@ -2,7 +2,7 @@ import React from "react";
 import { Table, Button } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-const TablaCategorias = ({ categorias, onEditar, onEliminar }) => {
+const TablaCategorias = ({ categorias, onEditar, onEliminar, generarPDFCategoria }) => {
   return (
     <>
       {categorias.length > 0 ? (
@@ -36,9 +36,18 @@ const TablaCategorias = ({ categorias, onEditar, onEliminar }) => {
                   <Button
                     variant="outline-danger"
                     size="sm"
+                    className="me-1"
                     onClick={() => onEliminar(categoria)}
                   >
                     <i className="bi bi-trash"></i>
+                  </Button>
+
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => generarPDFCategoria(categoria)}
+                  >
+                    <i className="bi bi-file-earmark-pdf"></i>
                   </Button>
                 </td>
               </tr>
