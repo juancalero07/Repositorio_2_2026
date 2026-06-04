@@ -12,6 +12,8 @@ import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import NotificacionOperacion from "../components/NotificacionOperacion";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import ModalEnvioCorreoCategorias from "../components/categorias/ModalEnvioCorreoCategorias";
+import emailjs from '@emailjs/browser';
 
 const Categorias = () => {
   const [categorias, setCategorias] = useState([]);
@@ -19,34 +21,21 @@ const Categorias = () => {
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Modales
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
   const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
 
-  // Estados de paginación
+  const [mostrarModalCorreo, setMostrarModalCorreo] = useState(false);
+  const [emailDestino, setEmailDestino] = useState("");
+  const [enviandoCorreo, setEnviandoCorreo] = useState(false);
+
   const [registrosPorPagina, setRegistrosPorPagina] = useState(10);
   const [paginaActual, setPaginaActual] = useState(1);
 
-  // Calcular categorías paginadas
   const categoriasPaginadas = categoriasFiltradas.slice(
     (paginaActual - 1) * registrosPorPagina,
     paginaActual * registrosPorPagina
   );
-
-  // Total de páginas
-  const totalPaginas = Math.ceil(categoriasFiltradas.length / registrosPorPagina);
-
-  // Función para cambiar página
-  const establecerPaginaActual = (pagina) => {
-    setPaginaActual(pagina);
-  };
-
-  // Función para cambiar cantidad por página
-  const establecerRegistrosPorPagina = (cantidad) => {
-    setRegistrosPorPagina(cantidad);
-    setPaginaActual(1);
-  };
 
   const [categoriaEditar, setCategoriaEditar] = useState(null);
   const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
@@ -62,7 +51,6 @@ const Categorias = () => {
     tipo: "",
   });
 
-  // ==================== CARGAR CATEGORÍAS ====================
   const cargarCategorias = async () => {
     setLoading(true);
     try {
@@ -84,7 +72,6 @@ const Categorias = () => {
     cargarCategorias();
   }, []);
 
-  // ==================== FILTRO ====================
   useEffect(() => {
     if (!textoBusqueda.trim()) {
       setCategoriasFiltradas(categorias);
@@ -96,10 +83,9 @@ const Categorias = () => {
       );
       setCategoriasFiltradas(filtradas);
     }
-    setPaginaActual(1); // Reiniciar a la página 1 cuando se busca
+    setPaginaActual(1);
   }, [textoBusqueda, categorias]);
 
-  // ==================== ABRIR MODALES ====================
   const abrirModalEdicion = (categoria) => {
     setCategoriaEditar({ ...categoria });
     setMostrarModalEdicion(true);
@@ -110,103 +96,62 @@ const Categorias = () => {
     setMostrarModalEliminacion(true);
   };
 
+  const abrirModalCorreo = () => {
+    setEmailDestino("");
+    setMostrarModalCorreo(true);
+  };
+
   const manejarBusqueda = (e) => {
     setTextoBusqueda(e.target.value);
   };
 
-  // ==================== CRUD ====================
-  const agregarCategoria = async () => {
-    try {
-      if (!nuevaCategoria.nombre_categoria.trim() || !nuevaCategoria.descripcion_categoria.trim()) {
-        setToast({ mostrar: true, mensaje: "Debe llenar todos los campos", tipo: "advertencia" });
-        return;
-      }
-
-      const { error } = await supabase
-        .from("categorias")
-        .insert([nuevaCategoria]);
-
-      if (error) throw error;
-
-      setNuevaCategoria({ nombre_categoria: "", descripcion_categoria: "" });
-      setMostrarModal(false);
-      await cargarCategorias();
-
-      setToast({ mostrar: true, mensaje: "Categoría registrada correctamente", tipo: "exito" });
-    } catch (error) {
-      console.error(error);
-      setToast({ mostrar: true, mensaje: "Error al registrar la categoría", tipo: "error" });
+  // 🔥 FUNCIÓN DEFINITIVA CON MAPPING ESTRUCTURADO Y PUBLIC KEY INCLUIDA
+  const enviarCorreoCategorias = () => {
+    if (!emailDestino.trim()) {
+      setToast({ mostrar: true, mensaje: "Ingresa un correo", tipo: "advertencia" });
+      return;
     }
-  };
 
-  const actualizarCategoria = async () => {
-    try {
-      const { error } = await supabase
-        .from("categorias")
-        .update({
-          nombre_categoria: categoriaEditar.nombre_categoria,
-          descripcion_categoria: categoriaEditar.descripcion_categoria,
-        })
-        .eq("id_categoria", categoriaEditar.id_categoria);
+    setEnviandoCorreo(true);
 
-      if (error) throw error;
+    // Formateo estricto con bloques limpios para el contenedor oscuro de tu HTML
+    const listaCategorias = categorias.map((c, index) => 
+      `${index + 1}. [${c.nombre_categoria.toUpperCase()}]\n   Descripción: ${c.descripcion_categoria || "Sin descripción asignada"}`
+    ).join("\n\n");
 
-      setMostrarModalEdicion(false);
-      await cargarCategorias();
-
-      setToast({ mostrar: true, mensaje: "Categoría actualizada correctamente", tipo: "exito" });
-    } catch (error) {
-      console.error(error);
-      setToast({ mostrar: true, mensaje: "Error al actualizar categoría", tipo: "error" });
-    }
-  };
-
-  const eliminarCategoria = async () => {
-    try {
-      const { error } = await supabase
-        .from("categorias")
-        .delete()
-        .eq("id_categoria", categoriaAEliminar.id_categoria);
-
-      if (error) throw error;
-
-      setMostrarModalEliminacion(false);
-      await cargarCategorias();
-
-      setToast({ mostrar: true, mensaje: "Categoría eliminada correctamente", tipo: "exito" });
-    } catch (error) {
-      console.error(error);
-      setToast({ mostrar: true, mensaje: "Error al eliminar categoría", tipo: "error" });
-    }
-  };
-
-  const generarPDFCategoria = (categoria) => {
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("Reporte de Categoría", 14, 20);
-    doc.line(14, 25, 195, 25);
-    doc.setFontSize(12);
-
-    autoTable(doc, {
-      startY: 35,
-      head: [["Campo", "Valor"]],
-      body: [
-        ["ID", categoria.id_categoria],
-        ["Nombre", categoria.nombre_categoria],
-        ["Descripción", categoria.descripcion_categoria],
-      ],
-    });
-
-    doc.save(`categoria_${categoria.id_categoria}.pdf`);
+    emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      {
+        user_email: emailDestino,
+        message: listaCategorias 
+      },
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY // Evita el fallo de llave requerida
+    )
+    .then(() => {
+      setToast({ mostrar: true, mensaje: "Correo enviado con éxito", tipo: "exito" });
+      setMostrarModalCorreo(false);
+    })
+    .catch((error) => {
+      console.error("Error al enviar con EmailJS:", error);
+      setToast({ mostrar: true, mensaje: "Error al enviar el correo", tipo: "error" });
+    })
+    .finally(() => setEnviandoCorreo(false));
   };
 
   return (
     <Container className="mt-4">
+      {/* HEADER */}
       <Row className="mb-4">
         <Col>
           <h3>Gestión de Categorías</h3>
         </Col>
+
         <Col className="text-end">
+          <Button variant="primary" onClick={abrirModalCorreo} className="me-2">
+            📧 Enviar Correo
+          </Button>
+
           <Button variant="success" onClick={() => setMostrarModal(true)}>
             Nueva Categoría
           </Button>
@@ -224,67 +169,26 @@ const Categorias = () => {
 
       {loading ? (
         <div className="text-center my-5">
-          <Spinner animation="border" variant="primary" />
-          <p className="mt-3">Cargando categorías...</p>
+          <Spinner animation="border" />
         </div>
       ) : (
         <>
-          {/* Tarjetas para móviles usando datos paginados */}
-          <div className="d-lg-none">
-            <TarjetaCategoria
-              categorias={categoriasPaginadas}
-              abrirModalEdicion={abrirModalEdicion}
-              abrirModalEliminacion={abrirModalEliminacion}
-            />
-          </div>
-
-          {/* Tabla para escritorio usando datos paginados */}
-          <div className="d-none d-lg-block">
-            <TablaCategorias
-              categorias={categoriasPaginadas}
-              onEditar={abrirModalEdicion}
-              onEliminar={abrirModalEliminacion}
-              generarPDFCategoria={generarPDFCategoria}
-            />
-          </div>
+          <TablaCategorias
+            categorias={categoriasPaginadas}
+            onEditar={abrirModalEdicion}
+            onEliminar={abrirModalEliminacion}
+          />
         </>
       )}
 
-      <Paginacion
-        registrosPorPagina={registrosPorPagina}
-        totalRegistros={categoriasFiltradas.length}
-        paginaActual={paginaActual}
-        establecerPaginaActual={establecerPaginaActual}
-        establecerRegistrosPorPagina={establecerRegistrosPorPagina}
-      />
-
-      {/* ==================== MODALES ==================== */}
-      <ModalRegistroCategoria
-        mostrarModal={mostrarModal}
-        setMostrarModal={setMostrarModal}
-        nuevaCategoria={nuevaCategoria}
-        manejoCambioInput={(e) =>
-          setNuevaCategoria({ ...nuevaCategoria, [e.target.name]: e.target.value })
-        }
-        agregarCategoria={agregarCategoria}
-      />
-
-      <ModalEdicionCategoria
-        mostrarModalEdicion={mostrarModalEdicion}
-        setMostrarModalEdicion={setMostrarModalEdicion}
-        categoriaEditar={categoriaEditar}
-        setCategoriaEditar={setCategoriaEditar}
-        manejoCambioInputEdicion={(e) =>
-          setCategoriaEditar({ ...categoriaEditar, [e.target.name]: e.target.value })
-        }
-        actualizarCategoria={actualizarCategoria}
-      />
-
-      <ModalEliminacionCategoria
-        mostrarModalEliminacion={mostrarModalEliminacion}
-        setMostrarModalEliminacion={setMostrarModalEliminacion}
-        categoriaAEliminar={categoriaAEliminar}
-        eliminarCategoria={eliminarCategoria}
+      <ModalEnvioCorreoCategorias
+        mostrarModalCorreo={mostrarModalCorreo}
+        setMostrarModalCorreo={setMostrarModalCorreo}
+        emailDestino={emailDestino}
+        setEmailDestino={setEmailDestino}
+        enviandoCorreo={enviandoCorreo}
+        enviarCorreoCategorias={enviarCorreoCategorias}
+        totalCategorias={categorias.length}
       />
 
       <NotificacionOperacion

@@ -6,7 +6,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 // Importar el proveedor de autenticación
 import { AuthProvider } from './context/AuthContext.jsx'
-
+import emailjs from '@emailjs/browser';
 import './index.css'
 import App from './App.jsx'
 
