@@ -14,8 +14,15 @@ const Encabezado = () => {
 
   const { usuario, logout, tienePermiso } = useAuth();
 
+  // 🔥 FUNCIÓN PARA MANDAR A LA RUTA Y OCULTAR EL MENÚ DE FORMA INMEDIATA
+  const navegarYCerrar = (ruta) => {
+    navigate(ruta);
+    setMostrarMenu(false); // Cierra el menú lateral automáticamente
+  };
+
   const cerrarSesion = () => {
     logout();
+    setMostrarMenu(false); // Cierra el menú lateral antes de salir
     navigate("/login");
   };
 
@@ -31,7 +38,7 @@ const Encabezado = () => {
       >
         <Container>
           <Navbar.Brand
-            onClick={() => navigate("/")}
+            onClick={() => navegarYCerrar("/")}
             style={{ cursor: "pointer" }}
           >
             <img src={logo} width="40" className="me-2" alt="Logo" />
@@ -53,55 +60,58 @@ const Encabezado = () => {
               <Nav className="ms-auto">
 
                 {tienePermiso("ver_inicio") && (
-                  <Nav.Link onClick={() => navigate("/")}>
+                  <Nav.Link onClick={() => navegarYCerrar("/")}>
                     Inicio
                   </Nav.Link>
                 )}
 
                 {tienePermiso("ver_clientes") && (
-                  <Nav.Link onClick={() => navigate("/clientes")}>
+                  <Nav.Link onClick={() => navegarYCerrar("/clientes")}>
                     Clientes
                   </Nav.Link>
                 )}
 
                 {tienePermiso("ver_categorias") && (
-                  <Nav.Link onClick={() => navigate("/categorias")}>
+                  <Nav.Link onClick={() => navegarYCerrar("/categorias")}>
                     Categorías
                   </Nav.Link>
                 )}
 
                 {tienePermiso("ver_empleados") && (
-                  <Nav.Link onClick={() => navigate("/empleados")}>
+                  <Nav.Link onClick={() => navegarYCerrar("/empleados")}>
                     Empleados
                   </Nav.Link>
                 )}
 
                 {tienePermiso("ver_productos") && (
-                  <Nav.Link onClick={() => navigate("/productos")}>
+                  <Nav.Link onClick={() => navegarYCerrar("/productos")}>
                     Productos
                   </Nav.Link>
                 )}
 
                 {tienePermiso("ver_catalogo") && (
-                  <Nav.Link onClick={() => navigate("/catalogo")}>
+                  <Nav.Link onClick={() => navegarYCerrar("/catalogo")}>
                     Catálogo
                   </Nav.Link>
                 )}
 
                 {tienePermiso("ver_permisos") && (
-                  <Nav.Link onClick={() => navigate("/permisos")}>
+                  <Nav.Link onClick={() => navegarYCerrar("/permisos")}>
                     Permisos
                   </Nav.Link>
                 )}
 
                 {tienePermiso("ver_ventas") && (
-                  <Nav.Link onClick={() => navigate("/ventas")}>
+                  <Nav.Link onClick={() => navegarYCerrar("/ventas")}>
                     Ventas
                   </Nav.Link>
                 )}
 
                 {/* BOTÓN IA */}
-                <Nav.Link onClick={() => setMostrarChatIA(true)}>
+                <Nav.Link onClick={() => {
+                  setMostrarChatIA(true);
+                  setMostrarMenu(false); // Cierra el menú al abrir la IA
+                }}>
                   <i className="bi bi-robot me-2"></i>
                   IA
                 </Nav.Link>

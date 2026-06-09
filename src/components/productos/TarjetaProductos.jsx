@@ -6,6 +6,8 @@ const TarjetaProductos = ({
   productos,
   abrirModalEdicion,
   abrirModalEliminacion,
+  generarQRImagen, // 👈 Recibimos la función para el código QR
+  copiarProducto,  // 👈 Recibimos la función para copiar al portapapeles
 }) => {
   const [cargando, setCargando] = useState(true);
   const [idTarjetaActiva, setIdTarjetaActiva] = useState(null);
@@ -110,7 +112,7 @@ const TarjetaProductos = ({
                         left: 0,
                         width: "100%",
                         height: "100%",
-                        background: "rgba(0,0,0,0.4)",
+                        background: "rgba(0,0,0,0.5)", // Un poco más oscuro para contrastar el botón azul
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -118,6 +120,35 @@ const TarjetaProductos = ({
                       }}
                     >
                       <div className="d-flex gap-2">
+                        {/* 📋 BOTÓN VERDE: COPIAR AL PORTAPAPELES */}
+                        <Button
+                          variant="success"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copiarProducto(producto);
+                            setIdTarjetaActiva(null);
+                          }}
+                          title="Copiar al portapapeles"
+                        >
+                          <i className="bi bi-clipboard"></i>
+                        </Button>
+
+                        {/* 🟦 BOTÓN AZUL: GENERAR CÓDIGO QR */}
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            generarQRImagen(producto);
+                            setIdTarjetaActiva(null);
+                          }}
+                          title="Generar código QR"
+                        >
+                          <i className="bi bi-qr-code"></i>
+                        </Button>
+
+                        {/* 🟧 BOTÓN AMARILLO: EDITAR */}
                         <Button
                           variant="warning"
                           size="sm"
@@ -125,10 +156,12 @@ const TarjetaProductos = ({
                             e.stopPropagation();
                             abrirModalEdicion(producto);
                           }}
+                          title="Editar producto"
                         >
                           <i className="bi bi-pencil"></i>
                         </Button>
 
+                        {/* 🟥 BOTÓN ROJO: ELIMINAR */}
                         <Button
                           variant="danger"
                           size="sm"
@@ -136,6 +169,7 @@ const TarjetaProductos = ({
                             e.stopPropagation();
                             abrirModalEliminacion(producto);
                           }}
+                          title="Eliminar producto"
                         >
                           <i className="bi bi-trash"></i>
                         </Button>

@@ -2,7 +2,13 @@ import React from "react";
 import { Table, Button } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-const TablaCategorias = ({ categorias, onEditar, onEliminar, generarPDFCategoria }) => {
+const TablaCategorias = ({
+  categorias,
+  onEditar,
+  onEliminar,
+  generarPDFCategoria,
+  copiarCategoria,
+}) => {
   return (
     <>
       {categorias.length > 0 ? (
@@ -20,15 +26,18 @@ const TablaCategorias = ({ categorias, onEditar, onEliminar, generarPDFCategoria
               <tr key={categoria.id_categoria}>
                 <td>{categoria.id_categoria}</td>
                 <td>{categoria.nombre_categoria}</td>
+
                 <td className="d-none d-md-table-cell">
                   {categoria.descripcion_categoria}
                 </td>
+
                 <td className="text-center">
                   <Button
                     variant="outline-warning"
                     size="sm"
                     className="me-1"
                     onClick={() => onEditar(categoria)}
+                    title="Editar"
                   >
                     <i className="bi bi-pencil"></i>
                   </Button>
@@ -38,6 +47,7 @@ const TablaCategorias = ({ categorias, onEditar, onEliminar, generarPDFCategoria
                     size="sm"
                     className="me-1"
                     onClick={() => onEliminar(categoria)}
+                    title="Eliminar"
                   >
                     <i className="bi bi-trash"></i>
                   </Button>
@@ -45,9 +55,20 @@ const TablaCategorias = ({ categorias, onEditar, onEliminar, generarPDFCategoria
                   <Button
                     variant="outline-primary"
                     size="sm"
+                    className="me-1"
                     onClick={() => generarPDFCategoria(categoria)}
+                    title="Generar PDF"
                   >
                     <i className="bi bi-file-earmark-pdf"></i>
+                  </Button>
+
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    onClick={() => copiarCategoria(categoria)}
+                    title="Copiar datos"
+                  >
+                    <i className="bi bi-clipboard"></i>
                   </Button>
                 </td>
               </tr>

@@ -6,6 +6,8 @@ const TablaProductos = ({
   productos,
   abrirModalEdicion,
   abrirModalEliminacion,
+  generarQRImagen, // 👈 Recibimos la función para el código QR
+  copiarProducto,  // 👈 Recibimos la función para copiar al portapapeles
 }) => {
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +43,7 @@ const TablaProductos = ({
               <th>Categoria</th>
               <th>Precio de Venta</th>
               <th style={{ width: "70px" }}>Imagen</th>
-              <th className="text-center">Acciones</th>
+              <th className="text-center" style={{ width: "180px" }}>Acciones</th>
             </tr>
           </thead>
 
@@ -77,19 +79,46 @@ const TablaProductos = ({
                 </td>
 
                 <td className="text-center">
+                  {/* 📋 BOTÓN VERDE: COPIAR AL PORTAPAPELES */}
+                  <Button
+                    variant="outline-success"
+                    size="sm"
+                    className="m-1"
+                    onClick={() => copiarProducto(producto)}
+                    title="Copiar al portapapeles"
+                  >
+                    <i className="bi bi-clipboard"></i>
+                  </Button>
+
+                  {/* 🟦 BOTÓN AZUL: GENERAR QR DE LA IMAGEN */}
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className="m-1"
+                    onClick={() => generarQRImagen(producto)}
+                    title="Generar código QR"
+                  >
+                    <i className="bi bi-qr-code"></i>
+                  </Button>
+
+                  {/* 🟧 BOTÓN AMARILLO: EDITAR */}
                   <Button
                     variant="outline-warning"
                     size="sm"
                     className="m-1"
                     onClick={() => abrirModalEdicion(producto)}
+                    title="Editar producto"
                   >
                     <i className="bi bi-pencil"></i>
                   </Button>
 
+                  {/* 🟥 BOTÓN ROJO: ELIMINAR */}
                   <Button
                     variant="outline-danger"
                     size="sm"
+                    className="m-1"
                     onClick={() => abrirModalEliminacion(producto)}
+                    title="Eliminar producto"
                   >
                     <i className="bi bi-trash"></i>
                   </Button>

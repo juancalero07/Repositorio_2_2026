@@ -7,7 +7,7 @@ import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
 import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
 import TablaProductos from "../components/productos/TablaProductos";
 import TarjetaProductos from "../components/productos/TarjetaProductos";
-
+import ModalQRProducto from "../components/productos/ModalQRProducto";
 // Componentes generales
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import NotificacionOperacion from "../components/NotificacionOperacion";
@@ -27,6 +27,9 @@ const Productos = () => {
   const [productoEditar, setProductoEditar] = useState(null);
   const [productoAEliminar, setProductoAEliminar] = useState(null);
 
+  const [mostrarModalQR, setMostrarModalQR] = useState(false);
+  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+
   const [nuevoProducto, setNuevoProducto] = useState({
     nombre_producto: "",
     descripcion_producto: "",
@@ -37,6 +40,68 @@ const Productos = () => {
 
   const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
 
+  // 🔍 FUNCIÓN PARA GENERAR QR DINÁMICO (CON VALIDACIÓN DE IMAGEN)
+  const generarQRImagen = (producto) => {
+    if (!producto?.url_imagen) {
+      setToast({
+        mostrar: true,
+        mensaje: "Este producto no tiene una imagen asignada para generar el QR",
+        tipo: "advertencia",
+      });
+      return;
+    }
+    setProductoSeleccionado(producto);
+    setMostrarModalQR(true);
+  };
+
+  // 📋 FUNCIÓN PARA COPIAR DATOS DEL PRODUCTO AL PORTAPAPELES
+// 📋 FUNCIÓN PARA COPIAR COMPATIBLE CON TELÉFONOS (HTTP / IPS LOCALES)
+  const copiarProducto = async (producto) => {
+    if (!producto) return;
+
+    const texto = `ID: ${producto.id_producto}\nProducto: ${producto.nombre_producto}\nPrecio: $${producto.precio_venta || '0.00'}`;
+
+    // 1. Intentar con el método moderno (Funciona en Localhost y Netlify/HTTPS)
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(texto);
+        setToast({
+          mostrar: true,
+          mensaje: `Producto "${producto.nombre_producto}" copiado al portapapeles.`,
+          tipo: "exito",
+        });
+        return; // Si funciona, se detiene aquí
+      } catch (err) {
+        console.error("Error con navigator.clipboard: ", err);
+      }
+    }
+
+    // 2. TRUCO DE RESPALDO: Si estás en el celular por IP (HTTP), usa este bloque:
+    try {
+      const el = document.createElement('textarea');
+      el.value = texto;
+      el.setAttribute('readonly', '');
+      el.style.position = 'absolute';
+      el.style.left = '-9999px';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      setToast({
+        mostrar: true,
+        mensaje: `Producto "${producto.nombre_producto}" copiado al portapapeles.`,
+        tipo: "exito",
+      });
+    } catch (err) {
+      console.error("Error con el método de respaldo: ", err);
+      setToast({
+        mostrar: true,
+        mensaje: "No se pudo copiar en este dispositivo",
+        tipo: "error",
+      });
+    }
+  };
   const manejoCambioInput = (e) => {
     const { name, value } = e.target;
     setNuevoProducto((prev) => ({ ...prev, [name]: value }));
@@ -258,15 +323,23 @@ const Productos = () => {
         <Alert>No hay productos</Alert>
       ) : (
         <Row>
+          {/* MÓVIL: Tarjetas */}
           <Col xs={12} className="d-lg-none">
-            <TarjetaProductos productos={productosFiltrados} />
+            <TarjetaProductos 
+              productos={productosFiltrados} 
+              generarQRImagen={generarQRImagen}
+              copiarProducto={copiarProducto}
+            />
           </Col>
 
+          {/* DESKTOP: Tabla */}
           <Col lg={12} className="d-none d-lg-block">
             <TablaProductos
               productos={productosFiltrados}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
+              generarQRImagen={generarQRImagen}
+              copiarProducto={copiarProducto}
             />
           </Col>
         </Row>
@@ -306,6 +379,14 @@ const Productos = () => {
         setMostrarModalEliminacion={setMostrarModalEliminacion}
         eliminarProducto={eliminarProducto}
         producto={productoAEliminar}
+      />
+
+      {/* MODAL DE CÓDIGO QR SINCRONIZADO */}
+     {/* MODAL DE CÓDIGO QR CORREGIDO SEGÚN LA GUÍA */}
+      <ModalQRProducto
+        mostrarModalQR={mostrarModalQR}
+        setMostrarModalQR={setMostrarModalQR}
+        productoSeleccionado={productoSeleccionado}
       />
 
       <NotificacionOperacion
